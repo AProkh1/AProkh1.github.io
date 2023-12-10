@@ -125,6 +125,11 @@
         let num2 = parseFloat(document.getElementById("angleInput").value);
         let resis = document.getElementById("ResistanceInput").value;
         let k = parseFloat(document.getElementById("k").value);
+
+        if (resis != "non" && k > 1){
+            alert('"k" must be less than 1')
+        }
+
         Move(num1, num2, resis, k);
     }
 
