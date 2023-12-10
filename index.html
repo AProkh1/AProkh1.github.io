@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ballistic Motion</title>
+    <style>
+        body {
+            background-color: #292c34;
+            color: #abb2bf;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #field {
+            width: 1000px;
+            height: 500px;
+            position: relative;
+            border: 3px solid sandybrown;
+            background-color: #000052;
+            margin-top: 20px;
+        }
+
+        #projectile {
+            width: 25px;
+            height: 25px;
+            background-color: gold;
+            position: absolute;
+        }
+
+        h1.main {
+            color: cornsilk;
+        }
+
+        label.input1 {
+            color: white;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #5e81ac;
+            background-color: #3b4252;
+            color: #eceff4;
+        }
+
+        button {
+            background-color: #bd93f9;
+            color: #292d3e;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #6272a4;
+            color: #eceff4;
+        }
+
+        select {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #5e81ac;
+            background-color: #3b4252;
+            color: #eceff4;
+        }
+
+        p {
+            color: olive;
+            margin-top: 20px;
+        }
+
+        p#output {
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+<h1 class="main">Ballistic Motion</h1>
+<div>
+    <h3>Write speed</h3>
+    <label for="speedInput" class="input1">Write speed (m/s)</label>
+    <input type="number" id="speedInput">
+
+    <label for="angleInput" class="input1">Write angle</label>
+    <input type="number" id="angleInput">
+
+    <button onclick="GetResult()">Get result</button>
+
+    <label for="ResistanceInput" class="input1">Air resistance function:</label>
+    <select id="ResistanceInput" name="Resistance">
+        <option value="non">None</option>
+        <option value="kv">kv</option>
+        <option value="kv^2">kv^2</option>
+    </select>
+
+    <label for="k" class="input1">Write k</label>
+    <input type="number" id="k">
+    <br>
+    <p id="output">Max height:   Time(s):  </p>
+</div>
+
+<p id="result"></p>
+
+<div id="field">
+    <div id="projectile"></div>
+</div>
+
+<script>
+    let time = 0;
+    let x = 0;
+    let y = 0;
+    let maxY = 0.0; // Declare maxY outside the Move function
+
+    function GetResult() {
+        maxY = 0.0; // Reset maxY when a new calculation is initiated
+        let num1 = parseFloat(document.getElementById("speedInput").value);
+        let num2 = parseFloat(document.getElementById("angleInput").value);
+        let resis = document.getElementById("ResistanceInput").value;
+        let k = parseFloat(document.getElementById("k").value);
+        Move(num1, num2, resis, k);
+    }
+
+    function Move(_speed, _angle, resist, k) {
+        let speed = parseFloat(_speed);
+        let angle = parseFloat(_angle);
+
+        const field = document.getElementById('field');
+        const projectile = document.getElementById('projectile');
+        const gravity = 9.8;
+        const timeIncrement = 0.017;
+        const vx = speed * Math.cos((angle * Math.PI) / 180);
+        const vy = speed * Math.sin((angle * Math.PI) / 180) - gravity * time;
+
+        if (resist === "non") {
+            x = x + vx * timeIncrement;
+            y = y + vy * timeIncrement;
+        } else if (resist === "kv") {
+            x = x + vx * timeIncrement - k * (vx * timeIncrement);
+            y = y + vy * timeIncrement - k * (vy * timeIncrement);
+        } else if (resist === "kv^2") {
+            x = x + vx * timeIncrement - k * (vx * timeIncrement) * (vx * timeIncrement);
+            y = y + vy * timeIncrement - k * (vy * timeIncrement) * (vy * timeIncrement);
+        }
+
+        projectile.style.left = x + 'px';
+        projectile.style.bottom = y + 'px';
+        time += timeIncrement;
+
+        if (y > maxY) {
+            maxY = y;
+        }
+        document.getElementById("output").innerText = "Max height: " + maxY.toFixed(2) + 'm' + " Time(s): " + time.toFixed(2);
+
+        if (y <= 0 || x >= 987) {
+            // Stop the animation when the projectile goes out of the field
+            time = 0;
+            x = 0;
+            y = 0;
+        } else {
+            requestAnimationFrame(() => Move(speed, angle, resist, k));
+        }
+    }
+</script>
+</body>
+</html>
