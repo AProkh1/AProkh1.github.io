@@ -24,13 +24,16 @@
             border: 3px solid #FFB400;
             background: linear-gradient(180deg, #2b2b2b 0%, #444 100%);
             margin-top: 20px;
+            overflow: hidden; /* Hide overflowing trail elements */
         }
 
-        #projectile {
-            width: 25px;
-            height: 25px;
+        .tail {
+            border-radius: 5px;
+            width: 5px;
+            height: 5px;
             background-color: #FFB400;
             position: absolute;
+            opacity: 0.7; /* Adjust the opacity for the trail effect */
         }
 
         h1.main {
@@ -83,28 +86,28 @@
     </style>
 </head>
 <body>
-<h1 class="main">Ballistic Motion</h1>
+<h1 class="main">Баллистическое движение</h1>
 <div>
-    <h3>Write speed</h3>
-    <label for="speedInput" class="input1">Write speed (m/s)</label>
+    <h3>Входные данные</h3>
+    <label for="speedInput" class="input1">Введите скорость (м/с)</label>
     <input type="number" id="speedInput">
 
-    <label for="angleInput" class="input1">Write angle</label>
+    <label for="angleInput" class="input1">Введите угол(в градусах)</label>
     <input type="number" id="angleInput">
 
-    <button onclick="GetResult()">Get result</button>
+    <button onclick="GetResult()">Полетели</button>
 
-    <label for="ResistanceInput" class="input1">Air resistance function:</label>
+    <label for="ResistanceInput" class="input1">Функция сопротивления воздуха:</label>
     <select id="ResistanceInput" name="Resistance">
-        <option value="non">None</option>
+        <option value="non">Нет сопротиваления</option>
         <option value="kv">kv</option>
         <option value="kv^2">kv^2</option>
     </select>
 
-    <label for="k" class="input1">Write k</label>
+    <label for="k" class="input1">Введите k</label>
     <input type="number" id="k">
     <br>
-    <p id="output">Max height:   Time(s):  </p>
+    <p id="output">Максимальная высота:   Время(с):  </p>
 </div>
 
 <p id="result"></p>
@@ -118,8 +121,15 @@
     let x = 0;
     let y = 0;
     let maxY = 0.0; // Declare maxY outside the Move function
+    let trail = []; // Array to store trail elements
 
     function GetResult() {
+        const field = document.getElementById('field');
+        trail.forEach(element => {
+            field.removeChild(element);
+        });
+        trail = [];
+        
         maxY = 0.0; // Reset maxY when a new calculation is initiated
         let num1 = parseFloat(document.getElementById("speedInput").value);
         let num2 = parseFloat(document.getElementById("angleInput").value);
@@ -127,12 +137,10 @@
         let k = parseFloat(document.getElementById("k").value);
 
         if (resis !== "non" && k > 1) {
-            alert('"k" must be less than 1')
+            alert('"k" должно быть меньше 1')
             return;
-        }
-        if (resis !== "non" && k < 0) {
-            alert('"k" must be greater than 0')
-            return;
+        } else if (resis !== "non" && k < 0) {
+            alert('"k" должно быть не меньше нуля')
         }
 
         Move(num1, num2, resis, k);
@@ -160,6 +168,16 @@
             y = y + vy * timeIncrement - k * (vy * timeIncrement) * (vy * timeIncrement);
         }
 
+        // Create a new trail element
+        const trailElement = document.createElement('div');
+        trailElement.className = 'tail';
+        trailElement.style.left = x + 'px';
+        trailElement.style.bottom = y + 'px';
+        field.appendChild(trailElement);
+        trail.push(trailElement);
+
+        // Remove the oldest trail element if the trail length exceeds a certain value
+
         projectile.style.left = x + 'px';
         projectile.style.bottom = y + 'px';
         time += timeIncrement;
@@ -167,13 +185,19 @@
         if (y > maxY) {
             maxY = y;
         }
-        document.getElementById("output").innerText = "Max height: " + maxY.toFixed(2) + 'm' + " Time(s): " + time.toFixed(2);
+        document.getElementById("output").innerText = "Максимальная высота: " + maxY.toFixed(2) + 'м,' + " Время(с): " + time.toFixed(2);
 
-        if (y <= 0 || x >= 975 || y >= 283 || x < 0) {
+        if (y <= 0 || x >= 987) {
             // Stop the animation when the projectile goes out of the field
             time = 0;
             x = 0;
             y = 0;
+
+            // Remove all trail elements when the animation stops
+            trail.forEach(element => {
+                field.removeChild(element);
+            });
+            trail = [];
         } else {
             requestAnimationFrame(() => Move(speed, angle, resist, k));
         }
