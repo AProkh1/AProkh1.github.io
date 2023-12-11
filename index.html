@@ -5,8 +5,8 @@
     <title>Ballistic Motion</title>
     <style>
         body {
-            background-color: #292c34;
-            color: #abb2bf;
+            background: linear-gradient(90deg, #1c1c1c 0%, #383838 100%);
+            color: #e0e0e0;
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
@@ -21,24 +21,24 @@
             width: 1000px;
             height: 500px;
             position: relative;
-            border: 3px solid sandybrown;
-            background-color: #000052;
+            border: 3px solid #FFB400;
+            background: linear-gradient(180deg, #2b2b2b 0%, #444 100%);
             margin-top: 20px;
         }
 
         #projectile {
             width: 25px;
             height: 25px;
-            background-color: gold;
+            background-color: #FFB400;
             position: absolute;
         }
 
         h1.main {
-            color: cornsilk;
+            color: #FFB400;
         }
 
         label.input1 {
-            color: white;
+            color: #e0e0e0;
             display: block;
             margin-top: 10px;
         }
@@ -46,39 +46,39 @@
         input {
             margin-bottom: 10px;
             padding: 8px;
-            border: 1px solid #5e81ac;
-            background-color: #3b4252;
-            color: #eceff4;
+            border: 1px solid #585858;
+            background-color: #353535;
+            color: #e0e0e0;
         }
 
         button {
-            background-color: #bd93f9;
-            color: #292d3e;
+            background-color: #FFB400;
+            color: #2c3e50;
             padding: 10px 15px;
             border: none;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #6272a4;
-            color: #eceff4;
+            background-color: #FFD700;
         }
 
         select {
             margin-bottom: 10px;
             padding: 8px;
-            border: 1px solid #5e81ac;
-            background-color: #3b4252;
-            color: #eceff4;
+            border: 1px solid #585858;
+            background-color: #353535;
+            color: #e0e0e0;
         }
 
         p {
-            color: olive;
+            color: #94a1b2;
             margin-top: 20px;
         }
 
         p#output {
-            color: #ffcc00;
+            color: #FFD700;
         }
     </style>
 </head>
@@ -126,8 +126,13 @@
         let resis = document.getElementById("ResistanceInput").value;
         let k = parseFloat(document.getElementById("k").value);
 
-        if (resis != "non" && k > 1){
+        if (resis !== "non" && k > 1) {
             alert('"k" must be less than 1')
+            return;
+        }
+        if (resis !== "non" && k < 0) {
+            alert('"k" must be greater than 0')
+            return;
         }
 
         Move(num1, num2, resis, k);
@@ -164,7 +169,7 @@
         }
         document.getElementById("output").innerText = "Max height: " + maxY.toFixed(2) + 'm' + " Time(s): " + time.toFixed(2);
 
-        if (y <= 0 || x >= 987) {
+        if (y <= 0 || x >= 975 || y >= 283 || x < 0) {
             // Stop the animation when the projectile goes out of the field
             time = 0;
             x = 0;
