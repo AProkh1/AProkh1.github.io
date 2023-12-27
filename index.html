@@ -24,7 +24,7 @@
             border: 3px solid #FFB400;
             background: linear-gradient(180deg, #2b2b2b 0%, #444 100%);
             margin-top: 20px;
-            overflow: hidden; /* Hide overflowing trail elements */
+            overflow: hidden;
         }
 
         .tail {
@@ -33,7 +33,7 @@
             height: 5px;
             background-color: #FFB400;
             position: absolute;
-            opacity: 0.7; /* Adjust the opacity for the trail effect */
+            opacity: 0.7;
         }
 
         h1.main {
@@ -95,8 +95,6 @@
     <label for="angleInput" class="input1">Введите угол(в градусах)</label>
     <input type="number" id="angleInput">
 
-    <button onclick="GetResult()">Полетели</button>
-
     <label for="ResistanceInput" class="input1">Функция сопротивления воздуха:</label>
     <select id="ResistanceInput" name="Resistance">
         <option value="non">Нет сопротиваления</option>
@@ -104,15 +102,36 @@
         <option value="kv^2">kv^2</option>
     </select>
 
-    <label for="k" class="input1">Введите k</label>
-    <input type="number" id="k">
+    <label for="k" class="input1" id="kLabel" style="display: none;">Введите k</label>
+    <input type="number" id="k" style="display: none;">
     <br>
-    <p id="output">Максимальная высота:   Время(с):  </p>
+    <script>
+        document.getElementById('ResistanceInput').addEventListener('change', function () {
+            let selectedValue = this.value;
+
+            let kLabel = document.getElementById('kLabel');
+            let kInput = document.getElementById('k');
+
+            if (selectedValue === 'non') {
+                kLabel.style.display = 'none';
+                kInput.style.display = 'none';
+            } else {
+                kLabel.style.display = 'block';
+                kInput.style.display = 'block';
+            }
+        });
+    </script>
+
+    <button onclick="GetResult()">Полетели</button>
+    <p id="output">Максимальная высота:  Дальность:   Время(с):  </p>
 </div>
 
 <p id="result"></p>
 
 <div id="field">
+    <div id="horizontal1"></div>
+    <div id="horizontal2"></div>
+    <div id="vertical1"></div>
     <div id="projectile"></div>
 </div>
 
@@ -120,8 +139,8 @@
     let time = 0;
     let x = 0;
     let y = 0;
-    let maxY = 0.0; // Declare maxY outside the Move function
-    let trail = []; // Array to store trail elements
+    let maxY = 0.0;
+    let trail = [];
 
     function GetResult() {
         const field = document.getElementById('field');
@@ -129,8 +148,8 @@
             field.removeChild(element);
         });
         trail = [];
-        
-        maxY = 0.0; // Reset maxY when a new calculation is initiated
+
+        maxY = 0.0;
         let num1 = parseFloat(document.getElementById("speedInput").value);
         let num2 = parseFloat(document.getElementById("angleInput").value);
         let resis = document.getElementById("ResistanceInput").value;
@@ -168,7 +187,6 @@
             y = y + vy * timeIncrement - k * (vy * timeIncrement) * (vy * timeIncrement);
         }
 
-        // Create a new trail element
         const trailElement = document.createElement('div');
         trailElement.className = 'tail';
         trailElement.style.left = x + 'px';
@@ -176,7 +194,6 @@
         field.appendChild(trailElement);
         trail.push(trailElement);
 
-        // Remove the oldest trail element if the trail length exceeds a certain value
 
         projectile.style.left = x + 'px';
         projectile.style.bottom = y + 'px';
@@ -185,15 +202,13 @@
         if (y > maxY) {
             maxY = y;
         }
-        document.getElementById("output").innerText = "Максимальная высота: " + maxY.toFixed(2) + 'м,' + " Время(с): " + time.toFixed(2);
+        document.getElementById("output").innerText = "Максимальная высота: " + maxY.toFixed(2) + ", Дальность: " + x.toFixed(2) + 'м,' + " Время(с): " + time.toFixed(2);
 
         if (y <= 0 || x >= 987) {
-            // Stop the animation when the projectile goes out of the field
             time = 0;
             x = 0;
             y = 0;
 
-            // Remove all trail elements when the animation stops
             trail.forEach(element => {
                 field.removeChild(element);
             });
