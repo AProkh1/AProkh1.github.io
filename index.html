@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Ballistic Motion</title>
@@ -85,6 +86,7 @@
         }
     </style>
 </head>
+
 <body>
 <h1 class="main">Баллистическое движение</h1>
 <div>
@@ -122,8 +124,9 @@
         });
     </script>
 
-    <button onclick="GetResult()">Полетели</button>
-    <p id="output">Максимальная высота:  Дальность:   Время(с):  </p>
+    <button id="flyButton" onclick="GetResult()">Полетели</button>
+
+    <p id="output">Максимальная высота: Дальность: Время(с): </p>
 </div>
 
 <p id="result"></p>
@@ -136,13 +139,21 @@
 </div>
 
 <script>
+
     let time = 0;
     let x = 0;
     let y = 0;
     let maxY = 0.0;
     let trail = [];
 
+    let requestId;
+
     function GetResult() {
+        cancelAnimationFrame(requestId);
+        time = 0;
+        x = 0;
+        y = 0;
+
         const field = document.getElementById('field');
         trail.forEach(element => {
             field.removeChild(element);
@@ -156,14 +167,17 @@
         let k = parseFloat(document.getElementById("k").value);
 
         if (resis !== "non" && k > 1) {
-            alert('"k" должно быть меньше 1')
+            alert('"k" должно быть меньше 1');
             return;
         } else if (resis !== "non" && k < 0) {
-            alert('"k" должно быть не меньше нуля')
+            alert('"k" должно быть не меньше нуля');
+            return;
         }
 
-        Move(num1, num2, resis, k);
+        requestId = requestAnimationFrame(() => Move(num1, num2, resis, k));
     }
+
+
 
     function Move(_speed, _angle, resist, k) {
         let speed = parseFloat(_speed);
@@ -194,7 +208,6 @@
         field.appendChild(trailElement);
         trail.push(trailElement);
 
-
         projectile.style.left = x + 'px';
         projectile.style.bottom = y + 'px';
         time += timeIncrement;
@@ -204,7 +217,7 @@
         }
         document.getElementById("output").innerText = "Максимальная высота: " + maxY.toFixed(2) + ", Дальность: " + x.toFixed(2) + 'м,' + " Время(с): " + time.toFixed(2);
 
-        if (y <= 0 || x >= 987) {
+        if (y <= 0 || x >= 987 || x < 0 || y > 487) {
             time = 0;
             x = 0;
             y = 0;
@@ -214,9 +227,10 @@
             });
             trail = [];
         } else {
-            requestAnimationFrame(() => Move(speed, angle, resist, k));
+            requestId = requestAnimationFrame(() => Move(speed, angle, resist, k));
         }
     }
 </script>
 </body>
+
 </html>
