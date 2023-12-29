@@ -32,9 +32,16 @@
             border-radius: 5px;
             width: 5px;
             height: 5px;
-            background-color: #FFB400;
             position: absolute;
             opacity: 0.7;
+        }
+
+        .trail1 {
+            background-color: #FFB400;
+        }
+
+        .trail2 {
+            background-color: #00FFFF;
         }
 
         h1.main {
@@ -135,32 +142,45 @@
     <div id="horizontal1"></div>
     <div id="horizontal2"></div>
     <div id="vertical1"></div>
-    <div id="projectile"></div>
+    <div id="projectile1" class="trail1"></div>
+    <div id="projectile2" class="trail2"></div>
 </div>
 
 <script>
-
     let time = 0;
-    let x = 0;
-    let y = 0;
-    let maxY = 0.0;
-    let trail = [];
+    let x1 = 0;
+    let y1 = 0;
+    let maxY1 = 0.0;
+    let trail1 = [];
+
+    let x2 = 0;
+    let y2 = 0;
+    let maxY2 = 0.0;
+    let trail2 = [];
 
     let requestId;
 
     function GetResult() {
         cancelAnimationFrame(requestId);
         time = 0;
-        x = 0;
-        y = 0;
+        x1 = 0;
+        y1 = 0;
+        x2 = 0;
+        y2 = 0;
 
         const field = document.getElementById('field');
-        trail.forEach(element => {
+        trail1.forEach(element => {
             field.removeChild(element);
         });
-        trail = [];
+        trail1 = [];
 
-        maxY = 0.0;
+        trail2.forEach(element => {
+            field.removeChild(element);
+        });
+        trail2 = [];
+
+        maxY1 = 0.0;
+        maxY2 = 0.0;
         let num1 = parseFloat(document.getElementById("speedInput").value);
         let num2 = parseFloat(document.getElementById("angleInput").value);
         let resis = document.getElementById("ResistanceInput").value;
@@ -177,55 +197,85 @@
         requestId = requestAnimationFrame(() => Move(num1, num2, resis, k));
     }
 
-
-
     function Move(_speed, _angle, resist, k) {
         let speed = parseFloat(_speed);
         let angle = parseFloat(_angle);
 
         const field = document.getElementById('field');
-        const projectile = document.getElementById('projectile');
+        const projectile1 = document.getElementById('projectile1');
+        const projectile2 = document.getElementById('projectile2');
         const gravity = 9.8;
         const timeIncrement = 0.017;
         const vx = speed * Math.cos((angle * Math.PI) / 180);
         const vy = speed * Math.sin((angle * Math.PI) / 180) - gravity * time;
 
         if (resist === "non") {
-            x = x + vx * timeIncrement;
-            y = y + vy * timeIncrement;
+            x1 = x1 + vx * timeIncrement;
+            y1 = y1 + vy * timeIncrement;
+
+            x2 = x2 + vx * timeIncrement;
+            y2 = y2 + vy * timeIncrement;
         } else if (resist === "kv") {
-            x = x + vx * timeIncrement - k * (vx * timeIncrement);
-            y = y + vy * timeIncrement - k * (vy * timeIncrement);
+            x1 = x1 + vx * timeIncrement - k * (vx * timeIncrement);
+            y1 = y1 + vy * timeIncrement - k * (vy * timeIncrement);
+
+            x2 = x2 + vx * timeIncrement;
+            y2 = y2 + vy * timeIncrement;
         } else if (resist === "kv^2") {
-            x = x + vx * timeIncrement - k * (vx * timeIncrement) * (vx * timeIncrement);
-            y = y + vy * timeIncrement - k * (vy * timeIncrement) * (vy * timeIncrement);
+            x1 = x1 + vx * timeIncrement - k * (vx * timeIncrement) * (vx * timeIncrement);
+            y1 = y1 + vy * timeIncrement - k * (vy * timeIncrement) * (vy * timeIncrement);
+
+            x2 = x2 + vx * timeIncrement;
+            y2 = y2 + vy * timeIncrement;
         }
 
-        const trailElement = document.createElement('div');
-        trailElement.className = 'tail';
-        trailElement.style.left = x + 'px';
-        trailElement.style.bottom = y + 'px';
-        field.appendChild(trailElement);
-        trail.push(trailElement);
+        const trailElement1 = document.createElement('div');
+        trailElement1.className = 'tail trail1';
+        trailElement1.style.left = x1 + 'px';
+        trailElement1.style.bottom = y1 + 'px';
+        field.appendChild(trailElement1);
+        trail1.push(trailElement1);
 
-        projectile.style.left = x + 'px';
-        projectile.style.bottom = y + 'px';
+        const trailElement2 = document.createElement('div');
+        trailElement2.className = 'tail trail2';
+        trailElement2.style.left = x2 + 'px';
+        trailElement2.style.bottom = y2 + 'px';
+        field.appendChild(trailElement2);
+        trail2.push(trailElement2);
+
+        projectile1.style.left = x1 + 'px';
+        projectile1.style.bottom = y1 + 'px';
+
+        projectile2.style.left = x2 + 'px';
+        projectile2.style.bottom = y2 + 'px';
+
         time += timeIncrement;
 
-        if (y > maxY) {
-            maxY = y;
+        if (Math.max(y1, y2) > Math.max(maxY1, maxY2)) {
+            maxY1 = y1;
+            maxY2 = y2;
         }
-        document.getElementById("output").innerText = "Максимальная высота: " + maxY.toFixed(2) + ", Дальность: " + x.toFixed(2) + 'м,' + " Время(с): " + time.toFixed(2);
 
-        if (y <= 0 || x >= 987 || x < 0 || y > 487) {
+        document.getElementById("output").innerText = "Максимальная высота: " + Math.max(maxY1, maxY2).toFixed(2) +
+            ", Дальность: " + Math.max(x1, x2).toFixed(2) + 'м,' + " Время(с): " + time.toFixed(2);
+
+        if (y1 <= 0 || x1 >= 987 || x1 < 0 || y1 > 487 || y2 <= 0 || x2 >= 987 || x2 < 0 || y2 > 487) {
             time = 0;
-            x = 0;
-            y = 0;
+            x1 = 0;
+            y1 = 0;
 
-            trail.forEach(element => {
+            x2 = 0;
+            y2 = 0;
+
+            trail1.forEach(element => {
                 field.removeChild(element);
             });
-            trail = [];
+            trail1 = [];
+
+            trail2.forEach(element => {
+                field.removeChild(element);
+            });
+            trail2 = [];
         } else {
             requestId = requestAnimationFrame(() => Move(speed, angle, resist, k));
         }
